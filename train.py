@@ -10,18 +10,24 @@ from datetime import datetime
 
 def main(run_started, split_id):
     parser = argparse.ArgumentParser(description='OpenLDN Training')
+    parser.add_argument('--gpu', default='0', type=str)
     parser.add_argument('--data-root', default=f'data', help='directory to store data')
     parser.add_argument('--split-root', default=f'random_splits', help='directory to store datasets')
     parser.add_argument('--out', default=f'outputs', help='directory to output the result')
     parser.add_argument('--dataset', default='cifar10', type=str,
-                        choices=['cifar10', 'cifar100', 'svhn', 'tinyimagenet', 'oxfordpets', 'aircraft', 'stanfordcars', 'imagenet100', 'herbarium'], help='dataset name')
+                        choices=['cifar10', 'cifar100', 'svhn', 'tinyimagenet', 'oxfordpets', 'aircraft',
+                                 'stanfordcars', 'imagenet100', 'herbarium'], help='dataset name')
     parser.add_argument('--lbl-percent', type=int, default=50, help='percent of labeled data')
     parser.add_argument('--novel-percent', default=50, type=int, help='percentage of novel classes, default 50')
     parser.add_argument('--arch', default='resnet18', type=str, help='model architecture')
-    parser.add_argument('--cw-ssl', default='mixmatch', type=str, choices=['mixmatch', 'uda'], help='closed-world SSL method to use')
+    parser.add_argument('--cw-ssl', default='mixmatch', type=str, choices=['mixmatch', 'uda'],
+                        help='closed-world SSL method to use')
     parser.add_argument('--description', default='default_run', type=str, help='description of the experiment')
 
     args = parser.parse_args()
+    os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
+    os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
+
     args.split_id = split_id
     args.data_root = os.path.join(args.data_root, args.dataset)
     os.makedirs(args.data_root, exist_ok=True)
@@ -33,31 +39,87 @@ def main(run_started, split_id):
     args.out = os.path.join(args.out, args.exp_name)
     os.makedirs(args.out, exist_ok=True)
 
-
     # run base experiment
     if args.dataset in ['cifar10', 'cifar100', 'svhn', 'tinyimagenet']:
-        os.system(f"python base/train-base.py --dataset {args.dataset} --lbl-percent {args.lbl_percent} --novel-percent {args.novel_percent} --out {args.out} --ssl-indexes {args.ssl_indexes} --split-id {args.split_id}")
-    
+        os.system(
+            f"python base/train-base.py "
+            f"--data-root {args.data_root} "
+            f"--split-root {args.split_root} "
+            f"--out {args.out} "
+            f"--dataset {args.dataset} "
+            f"--lbl-percent {args.lbl_percent} "
+            f"--novel-percent {args.novel_percent} "
+            f"--ssl-indexes {args.ssl_indexes} "
+            f"--split-id {args.split_id}")
+
     elif args.dataset in ['oxfordpets', 'aircraft', 'stanfordcars', 'herbarium']:
         # higher batch size.
-        os.system(f"python base/train-base.py --dataset {args.dataset} --lbl-percent {args.lbl_percent} --novel-percent {args.novel_percent} --batch-size 512 --out {args.out} --ssl-indexes {args.ssl_indexes} --split-id {args.split_id}")
-    
+        os.system(
+            f"python base/train-base.py "
+            f"--data-root {args.data_root} "
+            f"--split-root {args.split_root} "
+            f"--out {args.out} "
+            f"--dataset {args.dataset} "
+            f"--lbl-percent {args.lbl_percent} "
+            f"--novel-percent {args.novel_percent} "
+            f"--batch-size 512 "
+            f"--ssl-indexes {args.ssl_indexes} "
+            f"--split-id {args.split_id}")
+
     elif args.dataset == 'imagenet100':
         # higher batch size, and higher lr
-        os.system(f"python base/train-base.py --dataset {args.dataset} --lbl-percent {args.lbl_percent} --novel-percent {args.novel_percent} --lr 1-2 --batch-size 512 --out {args.out} --ssl-indexes {args.ssl_indexes} --split-id {args.split_id}")
-    
+        os.system(
+            f"python base/train-base.py "
+            f"--data-root {args.data_root} "
+            f"--split-root {args.split_root} "
+            f"--out {args.out} "
+            f"--dataset {args.dataset} "
+            f"--lbl-percent {args.lbl_percent} "
+            f"--novel-percent {args.novel_percent} "
+            f"--lr 1-2 "
+            f"--batch-size 512 "
+            f"--ssl-indexes {args.ssl_indexes} "
+            f"--split-id {args.split_id}")
 
     # run closed-world SSL experiment
     if args.dataset in ['cifar10', 'cifar100', 'svhn', 'tinyimagenet']:
-        os.system(f"python closed_world_ssl/train-{args.cw_ssl}.py --dataset {args.dataset} --lbl-percent {args.lbl_percent} --novel-percent {args.novel_percent} --out {args.out} --ssl-indexes {args.ssl_indexes}")
-    
+        os.system(
+            f"python closed_world_ssl/train-{args.cw_ssl}.py "
+            f"--data-root {args.data_root} "
+            f"--split-root {args.split_root} "
+            f"--out {args.out} "
+            f"--dataset {args.dataset} "
+            f"--lbl-percent {args.lbl_percent} "
+            f"--novel-percent {args.novel_percent} "
+            f"--ssl-indexes {args.ssl_indexes}")
+
     elif args.dataset in ['oxfordpets', 'aircraft', 'stanfordcars', 'herbarium']:
         # higher batch size, and lower epochs
-        os.system(f"python closed_world_ssl/train-{args.cw_ssl}.py --dataset {args.dataset} --lbl-percent {args.lbl_percent} --novel-percent {args.novel_percent} --batch-size 512 --epochs 200 --out {args.out} --ssl-indexes {args.ssl_indexes}")
-    
+        os.system(
+            f"python closed_world_ssl/train-{args.cw_ssl}.py "
+            f"--data-root {args.data_root} "
+            f"--split-root {args.split_root} "
+            f"--out {args.out} "
+            f"--dataset {args.dataset} "
+            f"--lbl-percent {args.lbl_percent} "
+            f"--novel-percent {args.novel_percent} "
+            f"--batch-size 512 "
+            f"--epochs 200 "
+            f"--ssl-indexes {args.ssl_indexes}")
+
     elif args.dataset == 'imagenet100':
         # higher batch size, lower epochs, and larger network
-        os.system(f"python closed_world_ssl/train-{args.cw_ssl}.py --dataset {args.dataset} --lbl-percent {args.lbl_percent} --novel-percent {args.novel_percent} --batch-size 512 --epochs 200 --arch resnet50 --out {args.out} --ssl-indexes {args.ssl_indexes}")
+        os.system(
+            f"python closed_world_ssl/train-{args.cw_ssl}.py "
+            f"--data-root {args.data_root} "
+            f"--split-root {args.split_root} "
+            f"--out {args.out} "
+            f"--dataset {args.dataset} "
+            f"--lbl-percent {args.lbl_percent} "
+            f"--novel-percent {args.novel_percent} "
+            f"--batch-size 512 "
+            f"--epochs 200 --arch resnet50 "
+            f"--ssl-indexes {args.ssl_indexes}")
 
 
 if __name__ == '__main__':
