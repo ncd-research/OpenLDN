@@ -11,9 +11,9 @@ from datetime import datetime
 def main(run_started, split_id):
     parser = argparse.ArgumentParser(description='OpenLDN Training')
     parser.add_argument('--gpu', default='0', type=str)
-    parser.add_argument('--data-root', default=f'data', help='directory to store data')
-    parser.add_argument('--split-root', default=f'random_splits', help='directory to store datasets')
-    parser.add_argument('--out', default=f'outputs', help='directory to output the result')
+    parser.add_argument('--data-root', default='data', help='directory to store data')
+    parser.add_argument('--split-root', default='random_splits', help='directory to store datasets')
+    parser.add_argument('--out', default='outputs', help='directory to output the result')
     parser.add_argument('--dataset', default='cifar10', type=str,
                         choices=['cifar10', 'cifar100', 'svhn', 'tinyimagenet', 'oxfordpets', 'aircraft',
                                  'stanfordcars', 'imagenet100', 'herbarium'], help='dataset name')
@@ -29,9 +29,9 @@ def main(run_started, split_id):
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 
     args.split_id = split_id
-    args.data_root = os.path.join(args.data_root, args.dataset)
-    os.makedirs(args.data_root, exist_ok=True)
-    os.makedirs(args.split_root, exist_ok=True)
+    # args.data_root = os.path.join(args.data_root, args.dataset)
+    # os.makedirs(args.data_root, exist_ok=True)
+    # os.makedirs(args.split_root, exist_ok=True)
     best_acc = 0
     args.exp_name = f'dataset_{args.dataset}_arch_{args.arch}_lbl_percent_{args.lbl_percent}_novel_percent_{args.novel_percent}_closed_wordl_ssl_{args.cw_ssl}_{args.description}_split_id_{args.split_id}_{run_started}'
     args.ssl_indexes = f'{args.split_root}/{args.dataset}_{args.lbl_percent}_{args.novel_percent}_{args.split_id}.pkl'
@@ -42,7 +42,7 @@ def main(run_started, split_id):
     # run base experiment
     if args.dataset in ['cifar10', 'cifar100', 'svhn', 'tinyimagenet']:
         os.system(
-            f"python base/train-base.py "
+            f"python3 base/train-base.py "
             f"--data-root {args.data_root} "
             f"--split-root {args.split_root} "
             f"--out {args.out} "
@@ -55,7 +55,7 @@ def main(run_started, split_id):
     elif args.dataset in ['oxfordpets', 'aircraft', 'stanfordcars', 'herbarium']:
         # higher batch size.
         os.system(
-            f"python base/train-base.py "
+            f"python3 base/train-base.py "
             f"--data-root {args.data_root} "
             f"--split-root {args.split_root} "
             f"--out {args.out} "
@@ -69,7 +69,7 @@ def main(run_started, split_id):
     elif args.dataset == 'imagenet100':
         # higher batch size, and higher lr
         os.system(
-            f"python base/train-base.py "
+            f"python3 base/train-base.py "
             f"--data-root {args.data_root} "
             f"--split-root {args.split_root} "
             f"--out {args.out} "
@@ -84,7 +84,7 @@ def main(run_started, split_id):
     # run closed-world SSL experiment
     if args.dataset in ['cifar10', 'cifar100', 'svhn', 'tinyimagenet']:
         os.system(
-            f"python closed_world_ssl/train-{args.cw_ssl}.py "
+            f"python3 closed_world_ssl/train-{args.cw_ssl}.py "
             f"--data-root {args.data_root} "
             f"--split-root {args.split_root} "
             f"--out {args.out} "
@@ -96,7 +96,7 @@ def main(run_started, split_id):
     elif args.dataset in ['oxfordpets', 'aircraft', 'stanfordcars', 'herbarium']:
         # higher batch size, and lower epochs
         os.system(
-            f"python closed_world_ssl/train-{args.cw_ssl}.py "
+            f"python3 closed_world_ssl/train-{args.cw_ssl}.py "
             f"--data-root {args.data_root} "
             f"--split-root {args.split_root} "
             f"--out {args.out} "
@@ -110,7 +110,7 @@ def main(run_started, split_id):
     elif args.dataset == 'imagenet100':
         # higher batch size, lower epochs, and larger network
         os.system(
-            f"python closed_world_ssl/train-{args.cw_ssl}.py "
+            f"python3 closed_world_ssl/train-{args.cw_ssl}.py "
             f"--data-root {args.data_root} "
             f"--split-root {args.split_root} "
             f"--out {args.out} "

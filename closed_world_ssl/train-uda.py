@@ -8,7 +8,6 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
-from tensorboardX import SummaryWriter
 from torch.utils.data.distributed import DistributedSampler
 from utils.evaluate_utils import hungarian_evaluate
 from tqdm import tqdm
@@ -16,15 +15,16 @@ from utils.pseudo_labeling_utils import pseudo_labeling
 from models.build_model import build_model
 import torch.backends.cudnn as cudnn
 from datasets.datasets_uda import get_dataset
-from utils.utils import Bar, AverageMeter, accuracy, SemiLoss, set_seed, WeightEMA, interleave, save_checkpoint
+from closed_world_ssl.utils.utils import Bar, AverageMeter, accuracy, SemiLoss, set_seed, WeightEMA, interleave, save_checkpoint
 
 best_acc = 0
 
 def main():
     parser = argparse.ArgumentParser(description='UDA Training')
-    parser.add_argument('--data-root', default=f'data', help='directory to store data')
-    parser.add_argument('--split-root', default=f'random_splits', help='directory to store datasets')
-    parser.add_argument('--out', default=f'outputs', help='directory to output the result')
+    parser.add_argument('--gpu', default='0', type=str)
+    parser.add_argument('--data-root', default='data', help='directory to store data')
+    parser.add_argument('--split-root', default='random_splits', help='directory to store datasets')
+    parser.add_argument('--out', default='outputs', help='directory to output the result')
     parser.add_argument('--gpu-id', default='0', type=int, help='id(s) for CUDA_VISIBLE_DEVICES')
     parser.add_argument('--num-workers', type=int, default=4, help='number of workers')
     parser.add_argument('--dataset', default='cifar10', type=str,
@@ -49,10 +49,11 @@ def main():
     parser.add_argument('--novel-percent', default=50, type=int, help='percentage of novel classes, default 50')
 
     args = parser.parse_args()
+    os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
+    os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
     state = {k: v for k, v in args._get_kwargs()}
     print(' | '.join(f'{k}={v}' for k, v in vars(args).items()))
     global best_acc
-    writer = SummaryWriter(args.out)
 
     if args.local_rank == -1:
         device = torch.device('cuda', args.gpu_id)
@@ -98,9 +99,9 @@ def main():
     elif args.dataset == 'herbarium':
         args.no_class = 682
 
-    args.data_root = os.path.join(args.data_root, args.dataset)
-    os.makedirs(args.data_root, exist_ok=True)
-    os.makedirs(args.split_root, exist_ok=True)
+    # args.data_root = os.path.join(args.data_root, args.dataset)
+    # os.makedirs(args.data_root, exist_ok=True)
+    # os.makedirs(args.split_root, exist_ok=True)
 
     # use the base pseudo-labels
     args.pl_dict = os.path.join(args.out, 'pseudo_labels_base.pkl')
@@ -202,19 +203,6 @@ def main():
             
             with open(f'{args.out}/score_logger_uda.txt', 'a+') as ofile:
                 ofile.write(f'***epoch: {epoch}, acc-pl: {pl_acc}, total-selected: {pl_no}***\n')
-            
-            writer.add_scalar('pl/1.acc_pl', pl_acc, epoch)
-            writer.add_scalar('pl/2.no_selected', pl_no, epoch)
-
-        writer.add_scalar('train/1.train_loss', train_loss, epoch)
-        writer.add_scalar('test/1.acc_known', test_acc_known, epoch)
-        writer.add_scalar('test/2.acc_novel', novel_cluster_results['acc'], epoch)
-        writer.add_scalar('test/3.nmi_novel', novel_cluster_results['nmi'], epoch)
-        writer.add_scalar('test/4.acc_all', all_cluster_results['acc'], epoch)
-        writer.add_scalar('test/5.nmi_all', all_cluster_results['nmi'], epoch)
-    
-    # close writer
-    writer.close()
 
     print('Best acc:')
     print(best_acc)

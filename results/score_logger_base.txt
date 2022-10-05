@@ -1,0 +1,25 @@
+************************************************************************
+
+gpu=0 | data_root=/home/miil/Datasets/FSCIL-CEC | split_root=cache/split | out=results | num_workers=4 | dataset=cifar100 | lbl_percent=50 | novel_percent=50 | pl_percent=10 | arch=resnet18 | epochs=50 | batch_size=200 | lr=0.0005 | lr_simnet=0.0001 | resume= | seed=-1 | mu=1 | no_progress=False | no_class=10 | threshold=0.5 | split_id=split_0 | ssl_indexes=cache/split/cifar100_50_50.pkl
+
+************************************************************************
+************************************************************************
+
+gpu=0 | data_root=/home/miil/Datasets/FSCIL-CEC | split_root=cache/split | out=results | num_workers=4 | dataset=cifar100 | lbl_percent=50 | novel_percent=50 | pl_percent=10 | arch=resnet18 | epochs=50 | batch_size=200 | lr=0.0005 | lr_simnet=0.0001 | resume= | seed=-1 | mu=1 | no_progress=False | no_class=10 | threshold=0.5 | split_id=split_0 | ssl_indexes=cache/split/cifar100_50_50.pkl
+
+************************************************************************
+************************************************************************
+
+gpu=0 | data_root=/home/miil/Datasets/FSCIL-CEC | split_root=cache/split | out=results | num_workers=4 | dataset=cifar100 | lbl_percent=50 | novel_percent=50 | pl_percent=10 | arch=resnet18 | epochs=50 | batch_size=200 | lr=0.0005 | lr_simnet=0.0001 | resume= | seed=-1 | mu=1 | no_progress=False | no_class=10 | threshold=0.5 | split_id=split_0 | ssl_indexes=cache/split/cifar100_50_50.pkl
+
+************************************************************************
+************************************************************************
+
+gpu=0 | data_root=/home/miil/Datasets/FSCIL-CEC | split_root=cache/split | out=results | num_workers=4 | dataset=cifar100 | lbl_percent=50 | novel_percent=50 | pl_percent=10 | arch=resnet18 | epochs=50 | batch_size=200 | lr=0.0005 | lr_simnet=0.0001 | resume= | seed=-1 | mu=1 | no_progress=False | no_class=10 | threshold=0.5 | split_id=split_1 | ssl_indexes=cache/split/cifar100_50_50_split_1.pkl
+
+************************************************************************
+************************************************************************
+
+gpu=0 | data_root=/home/miil/Datasets/FSCIL-CEC | split_root=cache/split | out=results | num_workers=4 | dataset=cifar100 | lbl_percent=50 | novel_percent=50 | pl_percent=10 | arch=resnet18 | epochs=50 | batch_size=200 | lr=0.0005 | lr_simnet=0.0001 | resume= | seed=-1 | mu=1 | no_progress=False | no_class=10 | threshold=0.5 | split_id=split_1 | ssl_indexes=cache/split/cifar100_50_50_split_1.pkl
+
+************************************************************************

@@ -9,7 +9,6 @@ import torch.backends.cudnn as cudnn
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
-from tensorboardX import SummaryWriter
 from tqdm import tqdm
 from models.build_model import build_model
 from utils.utils import AverageMeter, accuracy, set_seed, save_checkpoint, sim_matrix, interleave, de_interleave
@@ -21,9 +20,10 @@ from utils.pseudo_labeling_utils import pseudo_labeling
 
 def main():
     parser = argparse.ArgumentParser(description='Base Training')
-    parser.add_argument('--data-root', default=f'data', help='directory to store data')
-    parser.add_argument('--split-root', default=f'random_splits', help='directory to store datasets')
-    parser.add_argument('--out', default=f'outputs', help='directory to output the result')
+    parser.add_argument('--gpu', default='0', type=str)
+    parser.add_argument('--data-root', default='data', help='directory to store data')
+    parser.add_argument('--split-root', default='random_splits', help='directory to store datasets')
+    parser.add_argument('--out', default='outputs', help='directory to output the result')
     parser.add_argument('--num-workers', type=int, default=4, help='number of workers')
     parser.add_argument('--dataset', default='cifar10', type=str,
                         choices=['cifar10', 'cifar100', 'svhn', 'tinyimagenet', 'oxfordpets', 'aircraft', 'stanfordcars', 'imagenet100', 'herbarium'], help='dataset name')
@@ -45,10 +45,10 @@ def main():
     parser.add_argument('--ssl-indexes', default='', type=str, help='path to random data split')
 
     args = parser.parse_args()
+    os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
+    os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
     best_acc = 0
     print(' | '.join(f'{k}={v}' for k, v in vars(args).items()))
-
-    writer = SummaryWriter(logdir=args.out)
 
     with open(f'{args.out}/score_logger_base.txt', 'a+') as ofile:
         ofile.write('************************************************************************\n\n')
@@ -80,9 +80,9 @@ def main():
     elif args.dataset == 'herbarium':
         args.no_class = 682
 
-    args.data_root = os.path.join(args.data_root, args.dataset)
-    os.makedirs(args.data_root, exist_ok=True)
-    os.makedirs(args.split_root, exist_ok=True)
+    # args.data_root = os.path.join(args.data_root, args.dataset)
+    # os.makedirs(args.data_root, exist_ok=True)
+    # os.makedirs(args.split_root, exist_ok=True)
 
     # load dataset
     args.no_known = args.no_class - int((args.novel_percent*args.no_class)/100)
@@ -144,13 +144,6 @@ def main():
         print(f'epoch: {epoch}, acc-novel: {novel_cluster_results["acc"]}, nmi-novel: {novel_cluster_results["nmi"]}')
         print(f'epoch: {epoch}, acc-all: {all_cluster_results["acc"]}, nmi-all: {all_cluster_results["nmi"]}, best-acc: {best_acc}')
 
-        writer.add_scalar('train/1.train_loss', train_loss, epoch)
-        writer.add_scalar('test/1.acc_known', test_acc_known, epoch)
-        writer.add_scalar('test/2.acc_novel', novel_cluster_results['acc'], epoch)
-        writer.add_scalar('test/3.nmi_novel', novel_cluster_results['nmi'], epoch)
-        writer.add_scalar('test/4.acc_all', all_cluster_results['acc'], epoch)
-        writer.add_scalar('test/5.nmi_all', all_cluster_results['nmi'], epoch)
-
         model_to_save = model.module if hasattr(model, "module") else model
         simnet_to_save = simnet.module if hasattr(simnet, "module") else simnet
         save_checkpoint({
@@ -169,9 +162,6 @@ def main():
             ofile.write(f'epoch: {epoch}, acc-known: {test_acc_known}\n')
             ofile.write(f'epoch: {epoch}, acc-novel: {novel_cluster_results["acc"]}, nmi-novel: {novel_cluster_results["nmi"]}\n')
             ofile.write(f'epoch: {epoch}, acc-all: {all_cluster_results["acc"]}, nmi-all: {all_cluster_results["nmi"]}, best-acc: {best_acc}\n')
-
-    # close writer
-    writer.close()
 
     # pseudo-label generation and selection
     model.zero_grad()
