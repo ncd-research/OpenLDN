@@ -9,13 +9,13 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 from torch.utils.data.distributed import DistributedSampler
-from utils.evaluate_utils import hungarian_evaluate
+from closed_world_ssl.utils.evaluate_utils import hungarian_evaluate
 from tqdm import tqdm
-from utils.pseudo_labeling_utils import pseudo_labeling
-from models.build_model import build_model
+from closed_world_ssl.utils.pseudo_labeling_utils import pseudo_labeling
+from closed_world_ssl.models.build_model import build_model
 import torch.backends.cudnn as cudnn
-from datasets.datasets_mixmatch import get_dataset
-from utils.utils import Bar, AverageMeter, accuracy, SemiLoss, set_seed, WeightEMA, interleave, save_checkpoint
+from closed_world_ssl.datasets.datasets_mixmatch import get_dataset
+from closed_world_ssl.utils.utils import AverageMeter, accuracy, SemiLoss, set_seed, WeightEMA, interleave, save_checkpoint
 
 best_acc = 0
 
@@ -220,7 +220,6 @@ def train(args, labeled_trainloader, unlabeled_trainloader, model, optimizer, em
     ws = AverageMeter()
     end = time.time()
 
-    bar = Bar('Training', max=args.train_iteration)
     labeled_train_iter = iter(labeled_trainloader)
     unlabeled_train_iter = iter(unlabeled_trainloader)
 
@@ -308,22 +307,6 @@ def train(args, labeled_trainloader, unlabeled_trainloader, model, optimizer, em
         # measure elapsed time
         batch_time.update(time.time() - end)
         end = time.time()
-
-        # plot progress
-        bar.suffix  = '({batch}/{size}) Data: {data:.3f}s | Batch: {bt:.3f}s | Total: {total:} | ETA: {eta:} | Loss: {loss:.4f} | Loss_x: {loss_x:.4f} | Loss_u: {loss_u:.4f} | W: {w:.4f}'.format(
-                    batch=batch_idx + 1,
-                    size=args.train_iteration,
-                    data=data_time.avg,
-                    bt=batch_time.avg,
-                    total=bar.elapsed_td,
-                    eta=bar.eta_td,
-                    loss=losses.avg,
-                    loss_x=losses_x.avg,
-                    loss_u=losses_u.avg,
-                    w=ws.avg,
-                    )
-        bar.next()
-    bar.finish()
 
     return (losses.avg, losses_x.avg, losses_u.avg,)
 
