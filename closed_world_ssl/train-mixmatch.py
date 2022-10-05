@@ -9,13 +9,13 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 from torch.utils.data.distributed import DistributedSampler
-from closed_world_ssl.utils.evaluate_utils import hungarian_evaluate
+from utils.evaluate_utils import hungarian_evaluate
 from tqdm import tqdm
-from closed_world_ssl.utils.pseudo_labeling_utils import pseudo_labeling
-from closed_world_ssl.models.build_model import build_model
+from utils.pseudo_labeling_utils import pseudo_labeling
+from models.build_model import build_model
 import torch.backends.cudnn as cudnn
-from closed_world_ssl.datasets.datasets_mixmatch import get_dataset
-from closed_world_ssl.utils.utils import AverageMeter, accuracy, SemiLoss, set_seed, WeightEMA, interleave, save_checkpoint
+from datasets.datasets_mixmatch import get_dataset
+from utils.utils import AverageMeter, accuracy, SemiLoss, set_seed, WeightEMA, interleave, save_checkpoint
 
 best_acc = 0
 

@@ -2,7 +2,6 @@ import os
 import torch
 import numpy as np
 import random
-from progress.bar import Bar as Bar
 import torch.nn.functional as F
 import shutil
 
