@@ -8,14 +8,13 @@ read -r user_input
 data_root="${user_input}"
 
 # Execution
-python3 base/train-base.py \
+python3 closed_world_ssl/train-uda.py \
   --gpu 0 \
   --data-root ${data_root} \
   --split-root cache/split \
   --out results \
-  --dataset cifar10 \
+  --dataset cifar100 \
   --lbl-percent 50 \
   --novel-percent 50 \
-  --split-id split_1 \
-  --ssl-indexes cache/split/cifar10_50_50_split_1.pkl \
+  --ssl-indexes cache/split/cifar100_50_50_split_1.pkl \
   --arch resnet18

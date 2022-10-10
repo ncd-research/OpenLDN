@@ -9,7 +9,7 @@ data_root="${user_input}"
 
 # Execution
 python3 base/train-base.py \
-  --gpu 2 \
+  --gpu 0 \
   --data-root ${data_root} \
   --split-root cache/split \
   --out results \
