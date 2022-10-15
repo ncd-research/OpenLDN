@@ -7,7 +7,7 @@
 | CIFAR-100 paper        | 60.1                      | 59.3                      |
 | CIFAR-100 reproduction | Best: 59.83 / Mean: 59.48 | Best: 60.21 / Mean: 59.71 |
 | CIFAR-10 paper         | 94.0                      | 95.4                      |
-| CIFAR-10 reproduction  | -                         | -                         |
+| CIFAR-10 reproduction  | Best: 95.43 / Mean: 95.08 | Best: 95.72 / Mean: 95.48 |
 
 
 ## Training
